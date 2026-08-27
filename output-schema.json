@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Corte de padrón regional",
+  "description": "Salida estructurada de una corrida. Todas las claves de primer nivel son obligatorias, aunque vayan vacías.",
+  "type": "object",
+  "required": ["region", "corte", "corrida", "fuentes", "cambios", "inconsistencias", "casos_abiertos", "conteos", "delta", "objetivos"],
+  "properties": {
+    "region": { "type": "string", "description": "letra de la región" },
+    "corte": { "type": "string", "description": "fecha del corte, AAAA-MM-DD" },
+    "corrida": { "type": "integer", "description": "número de corrida de esta región" },
+    "fuentes": {
+      "type": "object",
+      "required": ["mensajes_analizados", "audios_transcriptos", "padron_filas", "vista_filtrada"],
+      "properties": {
+        "mensajes_analizados": { "type": "integer" },
+        "audios_transcriptos": { "type": "integer" },
+        "padron_filas": { "type": "integer" },
+        "vista_filtrada": { "type": "boolean", "description": "true frena el análisis" }
+      }
+    },
+    "cambios": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fila", "ficha", "hoy", "poner", "confianza", "cita", "autor", "fecha"],
+        "properties": {
+          "fila": { "type": "integer", "description": "del export ACTUAL, nunca del anterior" },
+          "ficha": { "type": "string" },
+          "hoy": { "enum": ["VERDE", "ROJO", "AMARILLO", "SIN CLASIFICAR", "FALLECIDO", "RENUNCIA", "NO VOTA", "EN BLANCO"] },
+          "poner": { "enum": ["VERDE", "ROJO", "AMARILLO", "SIN CLASIFICAR", "FALLECIDO", "RENUNCIA", "NO VOTA", "EN BLANCO"] },
+          "confianza": { "enum": ["firme", "a_verificar", "confirmacion_sin_cambio"] },
+          "cita": { "type": "string", "description": "textual, no parafraseada" },
+          "autor": { "type": "string" },
+          "fecha": { "type": "string" },
+          "afecta_universo": { "type": "boolean", "description": "true si sale del universo y bajan los objetivos" }
+        }
+      }
+    },
+    "inconsistencias": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tipo", "detalle", "fichas"],
+        "properties": {
+          "tipo": { "enum": ["duplicado", "voto_inexistente", "contradiccion_padron_chat", "informantes_contradictorios", "telefono_roto", "sociedad_sin_firmante"] },
+          "detalle": { "type": "string" },
+          "fichas": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "casos_abiertos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fichas", "estado_hoy", "que_falta", "preguntar_a", "pregunta", "abierto_desde"],
+        "properties": {
+          "fichas": { "type": "array", "items": { "type": "string" } },
+          "estado_hoy": { "type": "string" },
+          "que_falta": { "type": "string" },
+          "preguntar_a": { "type": "string" },
+          "pregunta": { "type": "string", "description": "redactada para copiar y pegar, entendible sin contexto" },
+          "abierto_desde": { "type": "string" }
+        }
+      }
+    },
+    "casos_cerrados_en_esta_corrida": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "caso": { "type": "string" },
+          "como_se_resolvio": { "type": "string" },
+          "quien_lo_cerro": { "type": "string" }
+        }
+      }
+    },
+    "conteos": {
+      "type": "object",
+      "description": "fichas por estado, al cierre de esta corrida",
+      "required": ["VERDE", "ROJO", "AMARILLO", "SIN CLASIFICAR", "FALLECIDO", "RENUNCIA", "NO VOTA", "EN BLANCO"],
+      "additionalProperties": { "type": "integer" }
+    },
+    "delta": {
+      "type": "object",
+      "description": "variación por estado contra el corte anterior",
+      "additionalProperties": { "type": "integer" }
+    },
+    "objetivos": {
+      "type": "object",
+      "required": ["votos_en_juego", "ideal", "muy_bueno", "piso"],
+      "properties": {
+        "votos_en_juego": { "type": "integer", "description": "total menos fallecidos, renuncias, no vota y en blanco" },
+        "ideal": { "type": "integer", "description": "50% + 1" },
+        "muy_bueno": { "type": "integer", "description": "40%" },
+        "piso": { "type": "integer", "description": "30%" },
+        "faltan_para_ideal": { "type": "integer" }
+      }
+    }
+  }
+}
